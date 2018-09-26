@@ -30,6 +30,7 @@ impl Storage for ElasticStorage {
    {
         let index_name = format!("{}-{}", self.prefix, event_type);
        match  self.client.document_index(index(index_name), id(doc.hash()), doc).send() {
+           Ok(res) => println!("Added created: {:?}", res.created()),
            Err(e) => println!("Error {:?}", e),
        };
     }
