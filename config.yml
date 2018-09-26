@@ -1,0 +1,9 @@
+storage:
+  url: "http://10.8.0.10:9200"
+  type: "elastic"
+prefix: "rum"
+listen: "127.0.0.1:8081"
+maxmindPath:
+clients:
+  - project: '553615d596773d61ed04f361'
+    key: '24640208679202e6f1a4efc45d0ff81c07679ac7742fc65907fdd961ec3d77c7dcbbfbafc39fb9d2c126cd4b42494e0aad29e6199e214dad08aacaba3a35d106de828b84043474b683e1114e56078749af8da1620fe0894178410b81f57cbb6ec4afe94ba02c8bc71f2c4d5c75eab715'
