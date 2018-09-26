@@ -19,7 +19,12 @@ clients:
 
 ```
 
+## Demo
+Go to https://mkaciuba.com and check network requests to https://greebo.mkaciuba.com.
+
 ## TODO:
 * maxmind geo data
 * other storages
 * handle other clients
+* tests!
+* refactor
