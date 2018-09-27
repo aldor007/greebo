@@ -3,6 +3,6 @@ FROM rust
 WORKDIR /usr/src/greebo
 COPY . .
 
-RUN cargo install
+RUN carbo build --release
 
-CMD ["greebo"]
+CMD ["/usr/src/greebo/greebo"]

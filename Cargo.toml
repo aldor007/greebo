@@ -10,9 +10,6 @@ string-null-empty = []
 # Handle JSON `null` as `None` in an `Option<String>`.
 string-null-none = []
 
-[target.x86_64-unknown-linux-musl]
-linker = "x86_64-linux-musl-gcc"
-
 [dependencies]
 bytes = "0.4"
 futures = "0.1"
@@ -36,4 +33,5 @@ threadpool = "1.7"
 maxminddb = "0.8.1"
 fasthash = "0.3"
 config = "0.9"
-
+clap = "2.32.0"
+log = "0.4"
