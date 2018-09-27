@@ -1,5 +1,5 @@
 # greebo
-Real time user monitoring service. It pushes data to ElasticSearch. Client library is compatible with keen.io
+Real time user monitoring service. It pushes data to ElasticSearch for now only compatile client library is keen.io
 
 ## Run
 Configuration
@@ -19,7 +19,12 @@ clients:
 
 ```
 
+## Demo
+Go to https://mkaciuba.com and check network requests to https://greebo.mkaciuba.com.
+
 ## TODO:
 * maxmind geo data
 * other storages
 * handle other clients
+* tests!
+* refactor
