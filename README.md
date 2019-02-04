@@ -1,5 +1,5 @@
 # greebo
-Real time user monitoring service. It pushes data to ElasticSearch for now only compatile client library is keen.io
+Real time user monitoring service. It pushes data to ElasticSearch for now only compatible client library is keen.io
 
 ## Run
 Embed on you site keen.io script
