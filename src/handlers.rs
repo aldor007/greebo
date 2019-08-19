@@ -46,7 +46,7 @@ fn prepare_response<T>(sc: http::StatusCode, res: T,  query: &HashMap<String,Str
     if query.contains_key("jsonp") {
         let jsonp = &query["jsonp"];
         return HttpResponse::build(sc)
-            .header("content-type", "application/json")
+            .header("content-type", "application/javascript")
             .body(format!("{}({})", jsonp, serde_json::to_string(&res).unwrap()));
     }
 
