@@ -27,7 +27,7 @@ Configuration
 
 ```bash
 $ cat config.yml
-# configruation for storage
+# configuration for storage
 storage:
   url: "http://10.8.0.10:9200"
   type: "elastic"
