@@ -74,6 +74,8 @@ impl <S> Worker<S> where S: storage::Storage + Send + Clone + Sync  + 'static {
             doc.user_agent = msg.user_agent;
             doc.hash = fasthash::murmur3::hash128(&msg.data).to_string();
             self.inner.storage.add(msg.event_type, doc);
+        } else {
+            warn!("Unknow event type {}", msg.event_type)
         }
     }
 }

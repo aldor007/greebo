@@ -13,6 +13,7 @@ pub struct Clicks {
     #[serde(default)]
     pub geo: Geo,
     time: Time,
+    #[serde(default)]
     element: Element,
     keen: Keen,
     tech: Tech,
