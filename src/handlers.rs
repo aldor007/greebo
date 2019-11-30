@@ -43,6 +43,10 @@ fn prepare_response<T>(sc: http::StatusCode, res: T,  query: &HashMap<String,Str
     where
         T: Serialize,
 {
+    if sc.as_u16() > 399 {
+        warn!("client bad request {}",  serde_json::to_string(&res).unwrap())
+    }
+
     if query.contains_key("jsonp") {
         let jsonp = &query["jsonp"];
         return HttpResponse::build(sc)
@@ -62,7 +66,16 @@ pub fn handle_keen(req: &HttpRequest<greebo::AppState>) -> impl Responder {
 
     let data_buf = match base64::decode(&query["data"]) {
         Ok(d) => d,
-        Err(_) => return prepare_response::<ErrResponse>(StatusCode::BAD_REQUEST, ErrResponse::msg( "unable to decode b64"), query),
+        Err(err) => match err {
+            base64::DecodeError::InvalidByte(size, offset) =>
+                return prepare_response::<ErrResponse>(StatusCode::BAD_REQUEST,
+                                                       ErrResponse::msg( format!("{} size {} offet {}", "unable to decode b64, invalid byte", size, offset)), query),
+            base64::DecodeError::InvalidLength => return prepare_response::<ErrResponse>(StatusCode::BAD_REQUEST,
+                                                       ErrResponse::msg(  "unable to decode b64, invalid length"), query),
+            base64::DecodeError::InvalidLastSymbol(size, offset) =>
+                return prepare_response::<ErrResponse>(StatusCode::BAD_REQUEST,
+                                                       ErrResponse::msg( format!("{} size {} offet {}", "unable to decode b64, invalid last symbol", size, offset)), query),
+        }
     };
     let parts: Vec<&str> = req.path().split("/").collect();
     if parts.len() < 5 {

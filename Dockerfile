@@ -1,8 +1,33 @@
-FROM rust
+# ------------------------------------------------------------------------------
+# Cargo Build Stage
+# ------------------------------------------------------------------------------
 
-WORKDIR /usr/src/greebo
+FROM rust:latest as cargo-build
+
+WORKDIR /usr/src/myapp
+
+COPY Cargo.lock Cargo.lock 
+COPY Cargo.toml Cargo.toml
+
+COPY src src
+
+
+RUN cargo build --release
+
+RUN rm -f target/release/deps/greebo**
+
 COPY . .
 
-RUN carbo build --release
+RUN cargo build --release
 
-CMD ["/usr/src/greebo/greebo"]
+RUN cargo install --path .
+
+# ------------------------------------------------------------------------------
+# Final Stage
+# ------------------------------------------------------------------------------
+
+FROM alpine:latest
+
+COPY --from=cargo-build /usr/local/cargo/bin/greebo /usr/local/bin/greebo
+
+CMD ["greebo"]
