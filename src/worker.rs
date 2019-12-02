@@ -62,6 +62,7 @@ impl <S> Worker<S> where S: storage::Storage + Send + Clone + Sync  + 'static {
 
     pub fn process_message(& mut self, msg: greebo::Msg)
     {
+        info!("Processing event {}", msg.event_type);
         if msg.event_type == "pageviews" {
             let mut doc: Pageviews = serde_json::from_str::<Pageviews>(msg.data.as_str()).unwrap();
             doc.ip_address = msg.ip;
@@ -75,7 +76,7 @@ impl <S> Worker<S> where S: storage::Storage + Send + Clone + Sync  + 'static {
             doc.hash = fasthash::murmur3::hash128(&msg.data).to_string();
             self.inner.storage.add(msg.event_type, doc);
         } else {
-            warn!("Unknow event type {}", msg.event_type)
+            warn!("Unknown event type {}", msg.event_type)
         }
     }
 }

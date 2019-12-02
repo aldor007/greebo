@@ -18,7 +18,7 @@ extern crate clap;
 extern crate log;
 
 use actix_web::{
-    http, middleware, server, App
+    http, server, App
 };
 use actix_web::middleware::cors::Cors;
 
@@ -74,7 +74,6 @@ fn main() {
                     .resource("/3.0/projects/{key}/events/{event}", |r| r.method(http::Method::GET).f(handlers::handle_keen))
                     .register()
             })
-            .middleware(middleware::Logger::default())
     }).bind(&listen)
         .unwrap()
         .shutdown_timeout(1)
