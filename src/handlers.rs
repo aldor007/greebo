@@ -1,10 +1,11 @@
 extern crate serde_json;
 extern crate base64;
+extern crate base64_url;
 use serde::ser::{Serialize};
 
-use actix_web::{
-    http, HttpRequest, HttpResponse, Responder
-};
+use actix_web::{dev, error, http, web, Error, HttpResponse, Result};
+
+
 use std::collections::HashMap;
 use self::http::StatusCode;
 use std::str;
@@ -58,13 +59,15 @@ fn prepare_response<T>(sc: http::StatusCode, res: T,  query: &HashMap<String,Str
 }
 
 
-pub fn handle_keen(req: &HttpRequest<greebo::AppState>) -> impl Responder {
-    let query = &req.query();
+pub async fn handle_keen(stat: web::Data<greebo::AppState>,  params: web::Path<UpdateParams>, req: HttpRequest) -> impl Responder {
+    let query = match req.uri().query() {
+        Some(x) => x
+    }
     if !query.contains_key("data") || !query.contains_key("api_key") {
         return prepare_response::<ErrResponse>(StatusCode::BAD_REQUEST, ErrResponse::msg("invalid query params"), query);
     }
 
-    let data_buf = match base64::decode(&query["data"]) {
+    let data_buf = match base64_url::decode(&query["data"]) {
         Ok(d) => d,
         Err(err) => match err {
             base64::DecodeError::InvalidByte(size, offset) =>
@@ -85,7 +88,7 @@ pub fn handle_keen(req: &HttpRequest<greebo::AppState>) -> impl Responder {
     let project = parts[3];
     let api_key = (&query["api_key"]).to_string();
     let mut found_key = false;
-    let clients = &req.state().config.clients;
+    let clients = state.config.clients;
     for c in clients {
         if c.project == project && c.key == api_key {
             found_key = true;

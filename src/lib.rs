@@ -1,9 +1,7 @@
 extern crate serde_json;
 extern crate serde;
 
-extern crate elastic;
-#[macro_use]
-extern crate elastic_derive;
+extern crate elasticsearch;
 #[macro_use]
 extern crate serde_derive;
 

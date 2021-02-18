@@ -5,22 +5,17 @@ extern crate env_logger;
 extern crate futures;
 extern crate crossbeam_channel;
 #[macro_use]
-extern crate elastic_derive;
-#[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
 extern crate serde;
 extern crate base64;
-extern crate elastic;
 extern crate config;
 extern crate clap;
 #[macro_use]
 extern crate log;
 
-use actix_web::{
-    http, server, App
-};
-use actix_web::middleware::cors::Cors;
+use actix_web::{http, web, App, HttpServer, Responder};
+use actix_cors::Cors;
 
 use http::header;
 use config::*;
@@ -31,7 +26,8 @@ mod handlers;
 mod greebo;
 mod worker;
 
-fn main() {
+#[actix_web::main]
+async fn main()  -> std::io::Result<()> {
     ::std::env::set_var("RUST_LOG", "greebo=info,actix_web=info" );
     env_logger::init();
     let sys = actix::System::new("greebo");
@@ -63,22 +59,22 @@ fn main() {
     worker.run();
 
     let listen = greebo_config_cpy.clone().listen;
+    info!("Started http server: {}", listen);
     let state = greebo::AppState{sender: worker.get_sender(), config: greebo_config_cpy.clone()};
-    server::new( move || {
-        App::with_state(state.clone()).configure(
-            |app| {
-                Cors::for_app(app)   // <- Construct CORS builder
+    HttpServer::new( move || {
+        App::new()
+            .data(state.clone())
+            .service(web::resource("/3.0/projects/{key}/events/{event}").route(web::get().to(handlers::handle_keen)))
+            .wrap(
+                Cors::default()
                     .allowed_origin("*")
                     .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT, header::ORIGIN, header::USER_AGENT, header::CONTENT_TYPE])
                     .max_age(3600)
-                    .resource("/3.0/projects/{key}/events/{event}", |r| r.method(http::Method::GET).f(handlers::handle_keen))
-                    .register()
-            })
+            )
+
     }).bind(&listen)
         .unwrap()
         .shutdown_timeout(1)
-        .start();
-
-    info!("Started http server: {}", listen);
-    let _ = sys.run();
+        .run()
+        .await
 }
