@@ -1,7 +1,5 @@
-use serde::ser::{Serialize};
-use types::Hashable;
+// mod storage;
 
-pub trait Storage {
-    fn add<S>(&self, event_type: String, data: S) where  S: Serialize + Hashable;
-}
-pub mod elastic_storage;
+pub(crate) mod base;
+pub(crate) mod elastic_storage;
+pub(crate) mod loki_storage;

@@ -2,9 +2,12 @@
 name = "greebo"
 version = "0.1.0"
 authors = ["Marcin Kaciuba <marcin.kaciuba@gmail.com>"]
+edition = "2018"
+
 
 [build-dependencies]
 protoc-rust-grpc = "~0.8"
+tonic-build = "0.4"
 
 [features]
 default = ["string-null-none"]
@@ -25,9 +28,9 @@ serde = "~1"
 serde_json = "~1"
 serde_derive = "~1"
 json = "0.12.4"
-actix = "0.10.0"
-actix-web = "3.3.2"
-
+actix-web = "3"
+actix-rt = "1.1.1"
+actix-cors = "0.5.4"
 elasticsearch = "7.11.0-alpha.1"
 grpc            = "~0.8"
 futures         = "~0.3"
@@ -39,4 +42,9 @@ fasthash = "0.4.0"
 config = "0.10.1"
 clap = "2.33.3"
 log = "0.4.14"
-
+tonic = "0.4.0"
+prost = "0.7"
+prost-types = "0.7"
+tower = "0.4.5"
+tokio = { version = "1.2.0", features = ["full"] }
+http = "0.2.3"

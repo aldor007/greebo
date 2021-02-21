@@ -28,8 +28,7 @@ pub struct GreeboConfig{
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Storage {
     pub url: String,
-    #[serde(rename = "type")]
-    pub _type: String,
+    pub sink: String,
 }
 
 pub const VERSION:  &'static str = "0.1.0";

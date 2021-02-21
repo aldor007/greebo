@@ -1,42 +1,56 @@
-
-extern crate serde_json;
-extern crate elastic;
 extern crate serde;
+extern crate serde_json;
+extern crate tonic;
 
-use storage::{Storage, Hashable};
-use serde::ser::{Serialize};
+use crate::storage::base::Storage;
+use serde::ser::Serialize;
 use tonic::{transport::Server, Request, Response, Status};
-use logproto::{Pusher, PushReques, PushResponse}
-use hello_world::HelloRequest;
+use logproto::{PushRequest, StreamAdapter, EntryAdapter};
+use logproto::pusher_client::{PusherClient};
+use tonic::transport::Channel;
+use tower::timeout::Timeout;
+use std::time::Duration;
 
 pub mod logproto {
     tonic::include_proto!("logproto");
 }
 
+type StdError = Box<dyn std::error::Error + Send + Sync + 'static>;
+type Result<T, E = StdError> = ::std::result::Result<T, E>;
+
 #[derive(Clone)]
 pub struct LokiStorage {
-    client: Client;
-    url: string;
+    client: PusherClient<tonic::transport::Channel>,
+
 }
 
-pub fn new<I>(url: I, prefix: String) -> LokiStorage
-        where
-            I: Into<String>,
-    {
-           let client = reqwest::Client::new();
-        ElasticStorage {
-            client,
-            url
-        }
-    }
+pub async fn connect<D>(dst: D) -> Result<LokiStorage, tonic::transport::Error>
+where
+    D: std::convert::TryInto<tonic::transport::Endpoint>,
+    D::Error: Into<StdError>,
+{
+    let client = PusherClient::connect(dst).await?;
 
-impl Storage for LokiStorage {
-  fn add<T>(&self, event_type: String, doc: T)
-       where T: Serialize + DocumentType + Hashable
-   {
-    let res = self.client.post(self.url)
-    .body("the exact body that is sent")
-    .send()
-       };
+    Ok(LokiStorage { client })
+}
+
+unsafe impl Storage for LokiStorage {
+    fn add<T>(&self, event_type: String, doc: T)
+    where
+        T: Serialize,
+    {
+        let request = tonic::Request::new(PushRequest{
+            streams: vec![StreamAdapter {
+                labels: "test".into(),
+                entries: vec! [EntryAdapter {
+                    timestamp: serde::__private::Some(::prost_types::Timestamp { seconds: 20, nanos: 999 }),
+                    line: serde_json::to_string(&doc).unwrap()
+                }]
+            }
+
+            ]
+        });
+        let mut client = self.client.clone();
+        client.push(request);
     }
 }
