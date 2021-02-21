@@ -1046,6 +1046,7 @@ dependencies = [
  "actix-cors",
  "actix-rt",
  "actix-web",
+ "async-trait",
  "base64 0.13.0",
  "base64-url",
  "bytes 1.0.1",

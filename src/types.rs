@@ -297,7 +297,7 @@ struct Window {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Ratio {
-    width: i64,
+    width: f64,
     height: f64,
 }
 

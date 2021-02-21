@@ -4,7 +4,7 @@ extern crate threadpool;
 extern crate fasthash;
 
 use crossbeam_channel::{Sender,Receiver, select};
-use std::thread;
+use tokio;
 use std::sync::Arc;
 use crate::greebo;
 use crate::types::{Clicks, Pageviews};
@@ -47,10 +47,10 @@ impl <S> Worker<S> where S: Storage + Send + Clone + Sync + 'static {
         for _ in 0..self.count {
             let local_th = local_self.clone();
             let mut self_cp = self.clone();
-            thread::spawn( move || {
+            tokio::spawn(async move {
                 loop {
                     if let Ok(msg) = local_th.receiver.recv() {
-                        self_cp.process_message(msg);
+                        self_cp.process_message(msg).await;
                     }
                 }
             });
@@ -58,7 +58,7 @@ impl <S> Worker<S> where S: Storage + Send + Clone + Sync + 'static {
         }
     }
 
-    pub fn process_message(& mut self, msg: greebo::Msg)
+    pub async fn process_message(& mut self, msg: greebo::Msg)
     {
         info!("Processing event {}", msg.event_type);
         let storage = self.inner.storage.clone();
@@ -67,13 +67,17 @@ impl <S> Worker<S> where S: Storage + Send + Clone + Sync + 'static {
             doc.ip_address = msg.ip;
             doc.user_agent = msg.user_agent;
             doc.hash = fasthash::murmur3::hash128(&msg.data).to_string();
-            storage.add(msg.event_type, doc);
+            let result = storage.add(msg.event_type, doc).await;
+            match result {
+                Ok(s) => info!("Event added {}", s.code),
+                Err(e) => warn!("Error {}", e.message)
+            }
         } else if msg.event_type  == "clicks" {
             let mut doc: Clicks = serde_json::from_str::< Clicks > (msg.data.as_str()).unwrap();
             doc.ip_address = msg.ip;
             doc.user_agent = msg.user_agent;
             doc.hash = fasthash::murmur3::hash128(&msg.data).to_string();
-            storage.add(msg.event_type, doc);
+            storage.add(msg.event_type, doc).await;
         } else {
             warn!("Unknown event type {}", msg.event_type)
         }

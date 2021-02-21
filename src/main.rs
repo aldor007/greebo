@@ -20,10 +20,8 @@ extern crate http;
 use actix_cors::Cors;
 use tokio::task::LocalSet;
 use tokio::runtime::Runtime;
-use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{http::header, get, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
 
-
-use http::header;
 use config::*;
 
 mod types;
@@ -32,9 +30,15 @@ mod handlers;
 mod greebo;
 mod worker;
 
+async fn index(req: HttpRequest) -> &'static str {
+    println!("REQ: {:?}", req);
+    "Hello world!"
+}
+
 #[tokio::main(flavor = "multi_thread", worker_threads = 10)]
+// #[actix_web::main]
 async fn main() -> std::result::Result<(), std::io::Error> {
-    ::std::env::set_var("RUST_LOG", "greebo=info,actix_web=info" );
+    ::std::env::set_var("RUST_LOG", "greebo=debug,actix_web=trace" );
     env_logger::init();
     let sys = actix_web::rt::System::new("greebo");
 
@@ -65,7 +69,6 @@ async fn main() -> std::result::Result<(), std::io::Error> {
     worker.run();
 
     let listen = greebo_config_cpy.clone().listen;
-    info!("Started http server: {}", listen);
     let state = greebo::AppState{sender: worker.get_sender(), config: greebo_config_cpy.clone()};
     let local = LocalSet::new();
     let rt = Runtime::new().unwrap();
@@ -74,19 +77,21 @@ async fn main() -> std::result::Result<(), std::io::Error> {
     // rt.spawn(async {
     //     actix_web::rt::System::new("tokio")
     //         .block_on(async move || {
+    info!("Started http server: {}", listen);
     HttpServer::new( move || {
+        info!("dupa");
         App::new()
             .data(state.clone())
-            .service(web::resource("/3.0/projects/{project}/events/{event}").route(web::get().to(handlers::handle_keen_get)))
-            .service(web::resource("/3.0/projects/{project}/events/{event}").route(web::post().to(handlers::handle_keen_post)))
+            .wrap(middleware::Logger::default())
             .wrap(
                 Cors::default()
-                    .allowed_origin("*")
+                    .allow_any_origin()
                     .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT, header::ORIGIN, header::USER_AGENT, header::CONTENT_TYPE])
                     .max_age(3600)
             )
-    }).bind(&listen)
-        .unwrap()
+            .service(web::resource("/3.0/projects/{project}/events/{event}").route(web::post().to(handlers::handle_keen_post)))
+            .service(web::resource("/3.0/projects/{project}/events/{event}").route(web::get().to(handlers::handle_keen_get)))
+    }).bind(&listen)?
         .shutdown_timeout(1)
         .workers(4)
         .run()

@@ -49,12 +49,12 @@ pub struct KeenParams {
 
 #[derive(Deserialize)]
 pub struct QueryKeen {
-    jsonp: String,
+    jsonp: Option<String>,
     api_key: String,
-    data: String
+    data: Option<String>
 }
 
-fn prepare_response<T>(sc: http::StatusCode, res: T,  query: web::Query<QueryKeen>) -> HttpResponse
+fn prepare_response<T>(sc: http::StatusCode, res: T,  query: web::Query<QueryKeen>) -> Result<HttpResponse>
     where
         T: Serialize
 {
@@ -62,23 +62,31 @@ fn prepare_response<T>(sc: http::StatusCode, res: T,  query: web::Query<QueryKee
         warn!("client bad request {}",  serde_json::to_string(&res).unwrap())
     }
 
-    if query.jsonp != "" {
-        return HttpResponse::build(sc)
+    if let Some(jsonp) = &query.jsonp {
+        return Ok(HttpResponse::build(sc)
             .header("content-type", "application/javascript")
-            .body(format!("{}({})", query.jsonp, serde_json::to_string(&res).unwrap()));
+            .body(format!("{}({})", jsonp, serde_json::to_string(&res).unwrap())));
     }
 
-    return HttpResponse::build(sc).json(&res);
+     Ok(HttpResponse::build(sc).json(&res))
 }
 
 
 
-pub async fn handle_keen_get(state: web::Data<greebo::AppState>,  params: web::Path<KeenParams>,  query:  web::Query<QueryKeen>, req: HttpRequest) -> HttpResponse {
+pub async fn handle_keen_get(state: web::Data<greebo::AppState>,  params: web::Path<KeenParams>,  query:  web::Query<QueryKeen>, req: HttpRequest) -> Result<HttpResponse> {
+    warn!("Post");
     if params.project.is_empty() || params.event.is_empty() {
         return prepare_response::<ErrResponse>(StatusCode::BAD_REQUEST, ErrResponse::msg("invalid query params"), query);
     }
 
-    let data_buf = match base64_url::decode(&query.data) {
+    let my_string = String::from("Hello World!");
+
+    let data = match &query.data {
+        Some(d) => d,
+        None => &my_string
+    };
+
+    let data_buf = match base64_url::decode(&data) {
         Ok(d) => d,
         Err(err) => match err {
             base64::DecodeError::InvalidByte(size, offset) =>
@@ -134,7 +142,7 @@ pub async fn handle_keen_get(state: web::Data<greebo::AppState>,  params: web::P
     return prepare_response::<OkResponse>(StatusCode::ACCEPTED, OkResponse::default(), query);
 }
 
-pub async fn handle_keen_post(state: web::Data<greebo::AppState>,  body: web::Bytes, params: web::Path<KeenParams>,  query:  web::Query<QueryKeen>, req: HttpRequest) -> HttpResponse {
+pub async fn handle_keen_post(state: web::Data<greebo::AppState>,  body: web::Bytes, params: web::Path<KeenParams>,  query:  web::Query<QueryKeen>, req: HttpRequest) -> Result<HttpResponse> {
     warn!("Post");
     if params.project.is_empty() || params.event.is_empty() {
         return prepare_response::<ErrResponse>(StatusCode::BAD_REQUEST, ErrResponse::msg("invalid query params"), query);
