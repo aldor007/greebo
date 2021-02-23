@@ -2,15 +2,16 @@ extern crate serde;
 extern crate serde_json;
 extern crate tonic;
 
-use crate::storage::base::{Storage, StorageRes, StorageErr};
-use serde::ser::Serialize;
-use tonic::{transport::Server, Request, Response, Status};
-use logproto::{PushRequest, StreamAdapter, EntryAdapter};
-use logproto::pusher_client::{PusherClient};
-use tonic::transport::Channel;
-use tower::timeout::Timeout;
-use std::time::Duration;
+use crate::storage::base::{Storage, StorageErr, StorageRes};
 use async_trait::async_trait;
+use logproto::pusher_client::PusherClient;
+use logproto::{EntryAdapter, PushRequest, StreamAdapter};
+use serde::ser::Serialize;
+use std::time::Duration;
+use std::time::SystemTime;
+use tonic::transport::Channel;
+use tonic::{transport::Server, Request, Response, Status};
+use tower::timeout::Timeout;
 
 pub mod logproto {
     tonic::include_proto!("logproto");
@@ -22,7 +23,6 @@ type Result<T, E = StdError> = ::std::result::Result<T, E>;
 #[derive(Clone)]
 pub struct LokiStorage {
     client: PusherClient<tonic::transport::Channel>,
-
 }
 
 pub async fn connect<D>(dst: D) -> Result<LokiStorage, tonic::transport::Error>
@@ -37,29 +37,32 @@ where
 
 #[async_trait]
 impl Storage for LokiStorage {
-   async  fn add<T>(&self, event_type: String, doc: T) -> Result<StorageRes, StorageErr>
+    async fn add<T>(&self, event_type: String, doc: T) -> Result<StorageRes, StorageErr>
     where
         T: Serialize + Send,
     {
-        let request = tonic::Request::new(PushRequest{
+        let timestamp = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+            Ok(n) => n,
+            Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+        };
+        let request = tonic::Request::new(PushRequest {
             streams: vec![StreamAdapter {
-                labels: "test".into(),
-                entries: vec! [EntryAdapter {
-                    timestamp: serde::__private::Some(::prost_types::Timestamp { seconds: 20, nanos: 999 }),
-                    line: serde_json::to_string(&doc).unwrap()
-                }]
-            }
-
-            ]
+                labels: "{job=\"greebo\"}".into(),
+                entries: vec![EntryAdapter {
+                    timestamp: serde::__private::Some(::prost_types::Timestamp {
+                        seconds: timestamp.as_secs() as i64,
+                        nanos: timestamp.subsec_nanos() as i32,
+                    }),
+                    line: serde_json::to_string(&doc).unwrap(),
+                }],
+            }],
         });
         let mut client = self.client.clone();
         match client.push(request).await {
-            Ok(r) => Ok(StorageRes {
-                code: 200
-            }),
+            Ok(r) => Ok(StorageRes { code: 200 }),
             Err(e) => Err(StorageErr {
-                message: e.message().to_string()
-            })
+                message: e.message().to_string(),
+            }),
         }
     }
 }

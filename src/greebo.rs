@@ -5,7 +5,7 @@ use crossbeam_channel::Sender;
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub sender: Sender<Msg>,
-    pub config: GreeboConfig
+    pub config: GreeboConfig,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -15,7 +15,7 @@ pub struct Clients {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct GreeboConfig{
+pub struct GreeboConfig {
     pub storage: Storage,
     pub prefix: String,
     pub listen: String,
@@ -31,11 +31,11 @@ pub struct Storage {
     pub sink: String,
 }
 
-pub const VERSION:  &'static str = "0.1.0";
+pub const VERSION: &'static str = "0.1.0";
 
 pub struct Msg {
     pub event_type: String,
     pub data: String,
     pub user_agent: String,
-    pub ip: String
+    pub ip: String,
 }

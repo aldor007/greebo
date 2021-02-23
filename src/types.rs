@@ -1,8 +1,8 @@
-use serde::Deserializer;
 use serde::Deserialize;
+use serde::Deserializer;
 
 pub trait Hashable {
-    fn hash<>(&self) -> String;
+    fn hash(&self) -> String;
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -23,8 +23,8 @@ pub struct Clicks {
     pub ip_address: String,
     page: Page,
     user: User,
-    #[serde(skip_deserializing,skip_serializing)]
-    pub hash: String
+    #[serde(skip_deserializing, skip_serializing)]
+    pub hash: String,
 }
 
 impl Hashable for Clicks {
@@ -32,7 +32,6 @@ impl Hashable for Clicks {
         self.hash.clone()
     }
 }
-
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Pageviews {
@@ -50,12 +49,12 @@ pub struct Pageviews {
     pub ip_address: String,
     page: Page,
     user: User,
-    #[serde(skip_deserializing,skip_serializing)]
-    pub hash: String
+    #[serde(skip_deserializing, skip_serializing)]
+    pub hash: String,
 }
 
 impl Hashable for Pageviews {
-    fn hash(&self) -> String{
+    fn hash(&self) -> String {
         self.hash.clone()
     }
 }
@@ -87,7 +86,7 @@ impl Default for Geo {
             coordinates: vec![0., 0.],
             postal_code: "".to_string(),
             country_code: "".to_string(),
-            continent: "".to_string()
+            continent: "".to_string(),
         }
     }
 }
@@ -163,62 +162,62 @@ struct Local {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Element {
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     name: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     title: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     text: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     node_name: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     href: String,
     #[serde(default)]
-    #[serde(deserialize_with="parse_int_or_null")]
+    #[serde(deserialize_with = "parse_int_or_null")]
     x_position: i64,
     #[serde(default)]
-    #[serde(deserialize_with="parse_int_or_null")]
+    #[serde(deserialize_with = "parse_int_or_null")]
     y_position: i64,
     #[serde(default)]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[cfg(feature = "string-null-none")]
     id: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     selector: String,
     #[cfg(feature = "string-null-none")]
     #[serde(default)]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(rename = "type")]
     type_field: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     class: String,
 }
 
-fn parse_int_or_null<'de, D>(d: D) -> Result<i64, D::Error> where D: Deserializer<'de> {
-    Deserialize::deserialize(d)
-        .map(|x: Option<_>| {
-            x.unwrap_or(0)
-        })
+fn parse_int_or_null<'de, D>(d: D) -> Result<i64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Deserialize::deserialize(d).map(|x: Option<_>| x.unwrap_or(0))
 }
 
-fn parse_string_or_null<'de, D>(d: D) -> Result<String, D::Error> where D: Deserializer<'de> {
-    Deserialize::deserialize(d)
-        .map(|x: Option<_>| {
-            x.unwrap_or("".to_string())
-        })
+fn parse_string_or_null<'de, D>(d: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Deserialize::deserialize(d).map(|x: Option<_>| x.unwrap_or("".to_string()))
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -363,4 +362,3 @@ struct ScrollState {
 struct User {
     uuid: String,
 }
-
