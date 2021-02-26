@@ -1,11 +1,11 @@
-use serde::Deserializer;
 use serde::Deserialize;
+use serde::Deserializer;
 
 pub trait Hashable {
-    fn hash<>(&self) -> String;
+    fn hash(&self) -> String;
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Clicks {
     pub user_agent: String,
     tracked_by: String,
@@ -23,8 +23,8 @@ pub struct Clicks {
     pub ip_address: String,
     page: Page,
     user: User,
-    #[serde(skip_deserializing,skip_serializing)]
-    pub hash: String
+    #[serde(skip_deserializing, skip_serializing)]
+    pub hash: String,
 }
 
 impl Hashable for Clicks {
@@ -33,8 +33,7 @@ impl Hashable for Clicks {
     }
 }
 
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Pageviews {
     pub user_agent: String,
     tracked_by: String,
@@ -50,17 +49,17 @@ pub struct Pageviews {
     pub ip_address: String,
     page: Page,
     user: User,
-    #[serde(skip_deserializing,skip_serializing)]
-    pub hash: String
+    #[serde(skip_deserializing, skip_serializing)]
+    pub hash: String,
 }
 
 impl Hashable for Pageviews {
-    fn hash(&self) -> String{
+    fn hash(&self) -> String {
         self.hash.clone()
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Geo {
     #[serde(default)]
     pub province: String,
@@ -87,12 +86,12 @@ impl Default for Geo {
             coordinates: vec![0., 0.],
             postal_code: "".to_string(),
             country_code: "".to_string(),
-            continent: "".to_string()
+            continent: "".to_string(),
         }
     }
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Time {
     #[serde(default)]
     utc: Utc,
@@ -100,7 +99,7 @@ struct Time {
     local: Local,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Utc {
     #[serde(default)]
     millisecond: i64,
@@ -130,7 +129,7 @@ struct Utc {
     quarter_of_year: i64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Local {
     #[serde(default)]
     millisecond: i64,
@@ -160,68 +159,68 @@ struct Local {
     quarter_of_year: i64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Element {
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     name: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     title: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     text: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     node_name: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     href: String,
     #[serde(default)]
-    #[serde(deserialize_with="parse_int_or_null")]
+    #[serde(deserialize_with = "parse_int_or_null")]
     x_position: i64,
     #[serde(default)]
-    #[serde(deserialize_with="parse_int_or_null")]
+    #[serde(deserialize_with = "parse_int_or_null")]
     y_position: i64,
     #[serde(default)]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[cfg(feature = "string-null-none")]
     id: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     selector: String,
     #[cfg(feature = "string-null-none")]
     #[serde(default)]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(rename = "type")]
     type_field: String,
     #[cfg(feature = "string-null-none")]
-    #[serde(deserialize_with="parse_string_or_null")]
+    #[serde(deserialize_with = "parse_string_or_null")]
     #[serde(default)]
     class: String,
 }
 
-fn parse_int_or_null<'de, D>(d: D) -> Result<i64, D::Error> where D: Deserializer<'de> {
-    Deserialize::deserialize(d)
-        .map(|x: Option<_>| {
-            x.unwrap_or(0)
-        })
+fn parse_int_or_null<'de, D>(d: D) -> Result<i64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Deserialize::deserialize(d).map(|x: Option<_>| x.unwrap_or(0))
 }
 
-fn parse_string_or_null<'de, D>(d: D) -> Result<String, D::Error> where D: Deserializer<'de> {
-    Deserialize::deserialize(d)
-        .map(|x: Option<_>| {
-            x.unwrap_or("".to_string())
-        })
+fn parse_string_or_null<'de, D>(d: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Deserialize::deserialize(d).map(|x: Option<_>| x.unwrap_or("".to_string()))
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Keen {
     #[serde(default)]
     timestamp: String,
@@ -231,7 +230,7 @@ struct Keen {
     id: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Tech {
     #[serde(default)]
     device: Device,
@@ -243,12 +242,12 @@ struct Tech {
     browser: Browser,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Device {
     family: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Profile {
     cookies: bool,
     name: String,
@@ -264,7 +263,7 @@ struct Profile {
     description: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Screen {
     orientation: Orientation,
     width: i64,
@@ -279,14 +278,14 @@ struct Screen {
     pixel_depth: i64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Orientation {
     #[serde(rename = "type")]
     type_field: String,
     angle: i64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Window {
     width: i64,
     ratio: Ratio,
@@ -295,13 +294,13 @@ struct Window {
     height: i64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Ratio {
-    width: i64,
+    width: f64,
     height: f64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Os {
     major: String,
     patch_minor: String,
@@ -310,7 +309,7 @@ struct Os {
     patch: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Browser {
     major: String,
     minor: String,
@@ -318,13 +317,13 @@ struct Browser {
     patch: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Url {
     info: Info,
     full: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Info {
     #[serde(default)]
     path: String,
@@ -336,13 +335,13 @@ struct Info {
     anchor: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Referrer {
     info: Info,
     full: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Page {
     #[serde(default)]
     scroll_state: ScrollState,
@@ -351,7 +350,7 @@ struct Page {
     time_on_page: i64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct ScrollState {
     pixel_max: i64,
     ratio: f64,
@@ -359,8 +358,7 @@ struct ScrollState {
     ratio_max: f64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, ElasticType)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct User {
     uuid: String,
 }
-

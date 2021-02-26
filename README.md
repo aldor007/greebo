@@ -1,5 +1,5 @@
 # greebo
-Real time user monitoring service. It pushes data to ElasticSearch for now only compatible client library is keen.io
+Real time user monitoring service. It pushes data to Loki, only compatible client library is keen.io
 
 ## Run
 Embed on you site keen.io script
@@ -16,7 +16,7 @@ Embed on you site keen.io script
             projectId: 'projectId',
             writeKey: 'writeKey'
           });
-        client.config.host = "greebo.host";  
+        client.config.host = "greebo.host";
         client.initAutoTracking();
 
     });
@@ -30,9 +30,8 @@ $ cat config.yml
 # configuration for storage
 storage:
   url: "http://10.8.0.10:9200"
-  type: "elastic"
+  sink: "loki"
 # index prefx
-prefix: "rum"
 listen: "127.0.0.1:8081"
 clients:
   - project: 'project'

@@ -1,9 +1,9 @@
 storage:
-  url: "http://10.8.0.10:9200"
-  type: "elastic"
+  url: "http://127.0.0.1:7000"
+  sink: "elastic"
 prefix: "rum"
 listen: "127.0.0.1:8081"
-maxmindPath:
+maxmindPath: "Test"
 clients:
-  - project: '553615d596773d61ed04f361'
-    key: '24640208679202e6f1a4efc45d0ff81c07679ac7742fc65907fdd961ec3d77c7dcbbfbafc39fb9d2c126cd4b42494e0aad29e6199e214dad08aacaba3a35d106de828b84043474b683e1114e56078749af8da1620fe0894178410b81f57cbb6ec4afe94ba02c8bc71f2c4d5c75eab715'
+  - project: '5fb1145de5570e76e806f9b7'
+    key: 'afd2c77a06b3e3bb42d9619749576e18b7b8ee33b18abf91b4b4b1c80dc7b2520a4a101fd561fbbf2c97150404f8febedf9498bd2002e8def6ea2a06cc71f2bddcd0b5510d30e6e10c3dcc4a6f4755efba6b90a2fc46da2f8051d95cf5e08c83'
