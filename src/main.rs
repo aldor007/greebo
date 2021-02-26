@@ -17,7 +17,7 @@ extern crate http;
 extern crate tokio;
 
 use actix_cors::Cors;
-use actix_web::{http::header, middleware, web, App, HttpRequest, HttpServer};
+use actix_web::{http::header, middleware, web, App, HttpServer};
 use tokio::runtime::Runtime;
 use tokio::task::LocalSet;
 
@@ -29,17 +29,11 @@ pub mod storage;
 mod types;
 mod worker;
 
-async fn index(req: HttpRequest) -> &'static str {
-    println!("REQ: {:?}", req);
-    "Hello world!"
-}
-
 #[tokio::main(flavor = "multi_thread", worker_threads = 10)]
-// #[actix_web::main]
 async fn main() -> std::result::Result<(), std::io::Error> {
     ::std::env::set_var("RUST_LOG", "greebo=debug,actix_web=trace");
     env_logger::init();
-    let sys = actix_web::rt::System::new("greebo");
+    let _sys = actix_web::rt::System::new("greebo");
 
     let matches = clap::App::new("greebo")
         .version(greebo::VERSION)
@@ -75,8 +69,8 @@ async fn main() -> std::result::Result<(), std::io::Error> {
         sender: worker.get_sender(),
         config: greebo_config_cpy.clone(),
     };
-    let local = LocalSet::new();
-    let rt = Runtime::new().unwrap();
+    let _local = LocalSet::new();
+    let _rt = Runtime::new().unwrap();
 
     info!("Started http server: {}", listen);
     HttpServer::new(move || {
@@ -109,5 +103,4 @@ async fn main() -> std::result::Result<(), std::io::Error> {
     .workers(4)
     .run()
     .await
-
 }

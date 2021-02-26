@@ -6,8 +6,8 @@ extern crate threadpool;
 use crate::greebo;
 use crate::storage::base::Storage;
 use crate::types::{Clicks, Pageviews};
-use crossbeam_channel::{select, Receiver, Sender};
-use std::ops::{Deref, DerefMut};
+use crossbeam_channel::{Receiver, Sender};
+
 use std::sync::Arc;
 use tokio;
 
@@ -83,7 +83,11 @@ where
             doc.ip_address = msg.ip;
             doc.user_agent = msg.user_agent;
             doc.hash = fasthash::murmur3::hash128(&msg.data).to_string();
-            storage.add(msg.event_type, doc).await;
+            let result = storage.add(msg.event_type, doc).await;
+            match result {
+                Ok(s) => info!("Event added {}", s.code),
+                Err(e) => warn!("Error {}", e.message),
+            }
         } else {
             warn!("Unknown event type {}", msg.event_type)
         }

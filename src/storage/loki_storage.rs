@@ -7,11 +7,8 @@ use async_trait::async_trait;
 use logproto::pusher_client::PusherClient;
 use logproto::{EntryAdapter, PushRequest, StreamAdapter};
 use serde::ser::Serialize;
-use std::time::Duration;
+
 use std::time::SystemTime;
-use tonic::transport::Channel;
-use tonic::{transport::Server, Request, Response, Status};
-use tower::timeout::Timeout;
 
 pub mod logproto {
     tonic::include_proto!("logproto");
@@ -37,7 +34,7 @@ where
 
 #[async_trait]
 impl Storage for LokiStorage {
-    async fn add<T>(&self, event_type: String, doc: T) -> Result<StorageRes, StorageErr>
+    async fn add<T>(&self, _event_type: String, doc: T) -> Result<StorageRes, StorageErr>
     where
         T: Serialize + Send,
     {
@@ -59,7 +56,7 @@ impl Storage for LokiStorage {
         });
         let mut client = self.client.clone();
         match client.push(request).await {
-            Ok(r) => Ok(StorageRes { code: 200 }),
+            Ok(_r) => Ok(StorageRes { code: 200 }),
             Err(e) => Err(StorageErr {
                 message: e.message().to_string(),
             }),

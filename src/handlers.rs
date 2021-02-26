@@ -1,13 +1,13 @@
 extern crate base64;
 extern crate base64_url;
 extern crate serde_json;
-use log::{info, warn};
+use log::warn;
 use serde::ser::Serialize;
 
-use actix_web::{dev, error, http, web, Error, HttpRequest, HttpResponse, Result};
+use actix_web::{http, web, HttpRequest, HttpResponse, Result};
 
 use self::http::StatusCode;
-use std::collections::HashMap;
+
 use std::str;
 
 use crate::greebo;
@@ -182,8 +182,23 @@ pub async fn handle_keen_get(
         ip: ip.to_string(),
     };
 
-    state.sender.send(msg);
-    return prepare_response::<OkResponse>(StatusCode::ACCEPTED, OkResponse::default(), query);
+    match state.sender.send(msg) {
+        Ok(_) => {
+            return prepare_response::<OkResponse>(
+                StatusCode::ACCEPTED,
+                OkResponse::default(),
+                query,
+            )
+        }
+        Err(err) => {
+            warn!("Unable to send message on the channel {}", err);
+            return prepare_response::<ErrResponse>(
+                StatusCode::BAD_REQUEST,
+                ErrResponse::msg("something went wrong "),
+                query,
+            );
+        }
+    }
 }
 
 pub async fn handle_keen_post(
@@ -237,6 +252,21 @@ pub async fn handle_keen_post(
         ip: ip.to_string(),
     };
 
-    state.sender.send(msg);
-    return prepare_response::<OkResponse>(StatusCode::ACCEPTED, OkResponse::default(), query);
+    match state.sender.send(msg) {
+        Ok(_) => {
+            return prepare_response::<OkResponse>(
+                StatusCode::ACCEPTED,
+                OkResponse::default(),
+                query,
+            )
+        }
+        Err(err) => {
+            warn!("Unable to send message on the channel {}", err);
+            return prepare_response::<ErrResponse>(
+                StatusCode::BAD_REQUEST,
+                ErrResponse::msg("something went wrong "),
+                query,
+            );
+        }
+    }
 }
