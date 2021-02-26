@@ -6,7 +6,7 @@ on:
       # Push events on main branch
       -  master
     tags:
-      - "*""
+      - "*"
 
 jobs:
   multi:
