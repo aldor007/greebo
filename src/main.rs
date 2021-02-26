@@ -31,7 +31,7 @@ mod worker;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 10)]
 async fn main() -> std::result::Result<(), std::io::Error> {
-    ::std::env::set_var("RUST_LOG", "greebo=debug,actix_web=trace");
+    // ::std::env::set_var("RUST_LOG", "greebo=debug,actix_web=trace");
     env_logger::init();
     let _sys = actix_web::rt::System::new("greebo");
 
