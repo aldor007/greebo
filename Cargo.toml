@@ -3,6 +3,7 @@ name = "greebo"
 version = "0.1.0"
 authors = ["Marcin Kaciuba <marcin.kaciuba@gmail.com>"]
 edition = "2018"
+build = "build.rs"
 
 
 [build-dependencies]
