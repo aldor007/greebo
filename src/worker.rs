@@ -1,5 +1,4 @@
 extern crate crossbeam_channel;
-extern crate fasthash;
 extern crate serde_json;
 extern crate threadpool;
 
@@ -72,7 +71,6 @@ where
             let mut doc: Pageviews = serde_json::from_str::<Pageviews>(msg.data.as_str()).unwrap();
             doc.ip_address = msg.ip;
             doc.user_agent = msg.user_agent;
-            doc.hash = fasthash::murmur3::hash128(&msg.data).to_string();
             let result = storage.add(msg.event_type, doc).await;
             match result {
                 Ok(s) => info!("Event added {}", s.code),
@@ -82,7 +80,6 @@ where
             let mut doc: Clicks = serde_json::from_str::<Clicks>(msg.data.as_str()).unwrap();
             doc.ip_address = msg.ip;
             doc.user_agent = msg.user_agent;
-            doc.hash = fasthash::murmur3::hash128(&msg.data).to_string();
             let result = storage.add(msg.event_type, doc).await;
             match result {
                 Ok(s) => info!("Event added {}", s.code),
