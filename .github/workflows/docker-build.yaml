@@ -12,6 +12,9 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -33,5 +36,6 @@ jobs:
           file: ./Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: |
-            ghcr.io/aldor007/greebo
+          tags:
+            - ghcr.io/aldor007/greebo:latest
+            - ghcr.io/aldor007/greebo:${{ steps.vars.outputs.tag }}
