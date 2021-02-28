@@ -24,10 +24,6 @@ COPY build.rs build.rs
 RUN cargo vendor > .cargo/config
 COPY proto proto
 RUN rustup component add rustfmt && rustup target add $(uname -m)-unknown-linux-musl
-RUN cargo build --release
-
-RUN rm -f target/release/deps/greebo**
-
 COPY . .
 
 RUN cargo build --release  --target $(uname -m)-unknown-linux-musl
