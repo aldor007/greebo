@@ -18,10 +18,10 @@ WORKDIR /usr/src/myapp
 COPY Cargo.lock Cargo.lock
 COPY Cargo.toml Cargo.toml
 RUN mkdir .cargo
-RUN cargo vendor > .cargo/config
 
 COPY src src
 COPY build.rs build.rs
+RUN cargo vendor > .cargo/config
 COPY proto proto
 RUN rustup component add rustfmt && rustup target add $(uname -m)-unknown-linux-musl
 RUN cargo build --release
