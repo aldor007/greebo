@@ -2,9 +2,6 @@ name: ci
 
 on:
   push:
-    branches:
-      # Push events on main branch
-      -  master
     tags:
       - "*"
 
