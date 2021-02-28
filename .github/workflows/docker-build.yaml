@@ -37,3 +37,5 @@ jobs:
           platforms: linux/arm64,linux/amd64
           push: true
           tags: ghcr.io/aldor007/greebo:latest, ghcr.io/aldor007/greebo:${{ steps.vars.outputs.tag }}
+          cache-from: type=registry,ref=ghcr.io/aldor007/greebo:latest
+          cache-to: type=inline
