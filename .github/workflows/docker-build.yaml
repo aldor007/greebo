@@ -36,6 +36,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags:
-            - ghcr.io/aldor007/greebo:latest
-            - ghcr.io/aldor007/greebo:${{ steps.vars.outputs.tag }}
+          tags: ghcr.io/aldor007/greebo:latest, ghcr.io/aldor007/greebo:${{ steps.vars.outputs.tag }}
