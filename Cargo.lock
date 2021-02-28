@@ -917,7 +917,7 @@ checksum = "f6503fe142514ca4799d4c26297c4248239fe8838d827db6bd6065c6ed29a6ce"
 
 [[package]]
 name = "greebo"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "actix-cors",
  "actix-rt",
@@ -932,7 +932,6 @@ dependencies = [
  "env_logger",
  "futures",
  "grpc",
- "http",
  "json",
  "log",
  "maxminddb",

@@ -81,13 +81,16 @@ where
     Ok(HttpResponse::build(sc).json(&res))
 }
 
+pub async fn handle_health() -> &'static str {
+    "OK"
+}
+
 pub async fn handle_keen_get(
     state: web::Data<greebo::AppState>,
     params: web::Path<KeenParams>,
     query: web::Query<QueryKeen>,
     req: HttpRequest,
 ) -> Result<HttpResponse> {
-    warn!("Post");
     if params.project.is_empty() || params.event.is_empty() {
         return prepare_response::<ErrResponse>(
             StatusCode::BAD_REQUEST,

@@ -34,7 +34,7 @@ where
 
 #[async_trait]
 impl Storage for LokiStorage {
-    async fn add<T>(&self, _event_type: String, doc: T) -> Result<StorageRes, StorageErr>
+    async fn add<T>(&self, event_type: String, doc: T) -> Result<StorageRes, StorageErr>
     where
         T: Serialize + Send,
     {
@@ -44,7 +44,7 @@ impl Storage for LokiStorage {
         };
         let request = tonic::Request::new(PushRequest {
             streams: vec![StreamAdapter {
-                labels: "{job=\"greebo\"}".into(),
+                labels: format!("{{job=\"greebo-events/{}\"}}", event_type).into(),
                 entries: vec![EntryAdapter {
                     timestamp: serde::__private::Some(::prost_types::Timestamp {
                         seconds: timestamp.as_secs() as i64,

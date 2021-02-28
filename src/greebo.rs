@@ -17,7 +17,6 @@ pub struct Clients {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GreeboConfig {
     pub storage: Storage,
-    pub prefix: String,
     pub listen: String,
     pub clients: Vec<Clients>,
     #[serde(default)]

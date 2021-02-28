@@ -13,7 +13,6 @@ extern crate serde_json;
 #[macro_use]
 extern crate log;
 extern crate actix_cors;
-extern crate http;
 extern crate tokio;
 
 use actix_cors::Cors;
@@ -28,6 +27,9 @@ mod handlers;
 pub mod storage;
 mod types;
 mod worker;
+
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 10)]
 async fn main() -> std::result::Result<(), std::io::Error> {
@@ -56,7 +58,6 @@ async fn main() -> std::result::Result<(), std::io::Error> {
 
     let greebo_config = settings.try_into::<greebo::GreeboConfig>().unwrap();
     let greebo_config_cpy = greebo_config.clone();
-
     let storage = storage::loki_storage::connect(greebo_config.storage.url)
         .await
         .unwrap();
@@ -89,6 +90,7 @@ async fn main() -> std::result::Result<(), std::io::Error> {
                     ])
                     .max_age(3600),
             )
+            .wrap(middleware::DefaultHeaders::new().header("x-greebo", VERSION))
             .service(
                 web::resource("/3.0/projects/{project}/events/{event}")
                     .route(web::post().to(handlers::handle_keen_post)),
@@ -96,6 +98,10 @@ async fn main() -> std::result::Result<(), std::io::Error> {
             .service(
                 web::resource("/3.0/projects/{project}/events/{event}")
                     .route(web::get().to(handlers::handle_keen_get)),
+            )
+            .service(
+                web::resource("/health")
+                    .route(web::get().to(handlers::handle_health)),
             )
     })
     .bind(&listen)?

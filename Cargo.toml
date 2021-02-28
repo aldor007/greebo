@@ -1,6 +1,6 @@
 [package]
 name = "greebo"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Marcin Kaciuba <marcin.kaciuba@gmail.com>"]
 edition = "2018"
 build = "build.rs"
@@ -45,5 +45,4 @@ tonic = "0.4.0"
 prost = "0.7"
 prost-types = "0.7"
 tokio = { version = "1.2.0", features = ["full"] }
-http = "0.2.3"
 async-trait = "0.1.42"

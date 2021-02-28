@@ -1,5 +1,5 @@
 storage:
-  url: "http://127.0.0.1:7000"
+  url: "grpc://127.0.0.1:7000"
   sink: "elastic"
 prefix: "rum"
 listen: "127.0.0.1:8081"
