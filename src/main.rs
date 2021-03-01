@@ -30,10 +30,10 @@ mod worker;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-
-#[tokio::main(flavor = "multi_thread", worker_threads = 10)]
+// #[tokio::main(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::main]
 async fn main() -> std::result::Result<(), std::io::Error> {
-    // ::std::env::set_var("RUST_LOG", "greebo=debug,actix_web=trace");
+    ::std::env::set_var("RUST_LOG", "greebo=debug,actix_web=trace");
     env_logger::init();
     let _sys = actix_web::rt::System::new("greebo");
 
@@ -99,10 +99,7 @@ async fn main() -> std::result::Result<(), std::io::Error> {
                 web::resource("/3.0/projects/{project}/events/{event}")
                     .route(web::get().to(handlers::handle_keen_get)),
             )
-            .service(
-                web::resource("/health")
-                    .route(web::get().to(handlers::handle_health)),
-            )
+            .service(web::resource("/health").route(web::get().to(handlers::handle_health)))
     })
     .bind(&listen)?
     .shutdown_timeout(1)

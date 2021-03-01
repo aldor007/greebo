@@ -2,7 +2,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate tonic;
 
-use crate::storage::base::{Storage, StorageErr, StorageRes};
+use crate::storage::base::{Factory, Storage, StorageErr, StorageRes};
 use async_trait::async_trait;
 use logproto::pusher_client::PusherClient;
 use logproto::{EntryAdapter, PushRequest, StreamAdapter};
@@ -19,22 +19,25 @@ type Result<T, E = StdError> = ::std::result::Result<T, E>;
 
 #[derive(Clone)]
 pub struct LokiStorage {
-    client: PusherClient<tonic::transport::Channel>,
+    client: Option<PusherClient<tonic::transport::channel::Channel>>,
+    url: String,
 }
 
-pub async fn connect<D>(dst: D) -> Result<LokiStorage, tonic::transport::Error>
+pub async fn connect(url: String) -> Result<LokiStorage, tonic::transport::Error>
 where
-    D: std::convert::TryInto<tonic::transport::Endpoint>,
-    D::Error: Into<StdError>,
 {
-    let client = PusherClient::connect(dst).await?;
+    let url_cp = url.clone();
+    let client = PusherClient::connect(String::from(url)).await?;
 
-    Ok(LokiStorage { client })
+    Ok(LokiStorage {
+        client: Some(client),
+        url: url_cp.clone(),
+    })
 }
 
 #[async_trait]
 impl Storage for LokiStorage {
-    async fn add<T>(&self, event_type: String, doc: T) -> Result<StorageRes, StorageErr>
+    async fn add<T>(&mut self, event_type: String, doc: T) -> Result<StorageRes, StorageErr>
     where
         T: Serialize + Send,
     {
@@ -54,12 +57,32 @@ impl Storage for LokiStorage {
                 }],
             }],
         });
-        let mut client = self.client.clone();
-        match client.push(request).await {
-            Ok(_r) => Ok(StorageRes { code: 200 }),
-            Err(e) => Err(StorageErr {
-                message: e.message().to_string(),
-            }),
+        match self.client {
+            Some(ref mut c) => match c.push(request).await {
+                Ok(_r) => Ok(StorageRes { code: 200 }),
+                Err(e) => Err(StorageErr {
+                    message: e.message().to_string(),
+                }),
+            },
+            None => {
+                return Err(StorageErr {
+                    message: "not connected".into(),
+                })
+            }
+        }
+    }
+}
+
+impl Factory for LokiStorage {
+    fn new(self) -> Self {
+        let url = self.url.clone();
+        let channel = tonic::transport::Channel::from_shared(url)
+            .unwrap()
+            .connect_lazy()
+            .unwrap();
+        LokiStorage {
+            client: Some(PusherClient::new(channel)),
+            url: self.url.clone(),
         }
     }
 }

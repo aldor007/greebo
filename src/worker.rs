@@ -3,12 +3,12 @@ extern crate serde_json;
 extern crate threadpool;
 
 use crate::greebo;
-use crate::storage::base::Storage;
+use crate::storage::base::{Storage, StorageErr, StorageRes};
 use crate::types::{Clicks, Pageviews};
-use crossbeam_channel::{Receiver, Sender};
-
+use crossbeam_channel::{select, Receiver, Sender};
 use std::sync::Arc;
 use tokio;
+use tokio::sync::Mutex;
 
 #[derive(Clone)]
 struct WorkerInner<S>
@@ -17,7 +17,7 @@ where
 {
     sender: Sender<greebo::Msg>,
     receiver: Receiver<greebo::Msg>,
-    storage: Arc<S>,
+    storage: Arc<Mutex<S>>,
 }
 
 #[derive(Clone)]
@@ -34,12 +34,12 @@ where
     S: Storage + Send + Clone + Sync + 'static,
 {
     pub fn new(count: usize, storage: S) -> Worker<S> {
-        let (s, r) = crossbeam_channel::unbounded::<greebo::Msg>();
+        let (s, r) = crossbeam_channel::bounded::<greebo::Msg>(count);
         Worker {
             inner: Arc::new(WorkerInner {
                 sender: s,
                 receiver: r,
-                storage: Arc::new(storage),
+                storage: Arc::new(Mutex::new(storage)),
             }),
             count,
         }
@@ -52,41 +52,42 @@ where
     pub fn run(&mut self) {
         let local_self = self.inner.clone();
         for _ in 0..self.count {
-            let local_th = local_self.clone();
+            let local_recv = local_self.receiver.clone();
             let mut self_cp = self.clone();
             tokio::spawn(async move {
                 loop {
-                    if let Ok(msg) = local_th.receiver.recv() {
-                        self_cp.process_message(msg).await;
+                    select! {
+                        recv(local_recv) -> msg =>  match msg {
+                            Ok (m) => match self_cp.process_message(m).await {
+                                Ok(res) =>  info!("Event added {}", res),
+                                Err(err) => warn!("Error adding event {}", err)
+                            },
+                            Err(err) => warn!("Recv error {}", err)
+                        }
                     }
                 }
             });
         }
     }
 
-    pub async fn process_message(&mut self, msg: greebo::Msg) {
+    pub async fn process_message(&mut self, msg: greebo::Msg) -> Result<StorageRes, StorageErr> {
         info!("Processing event {}", msg.event_type);
-        let storage = self.inner.storage.clone();
+        let mut storage = self.inner.storage.lock().await;
         if msg.event_type == "pageviews" {
             let mut doc: Pageviews = serde_json::from_str::<Pageviews>(msg.data.as_str()).unwrap();
             doc.ip_address = msg.ip;
             doc.user_agent = msg.user_agent;
-            let result = storage.add(msg.event_type, doc).await;
-            match result {
-                Ok(s) => info!("Event added {}", s.code),
-                Err(e) => warn!("Error {}", e.message),
-            }
+            storage.add(msg.event_type, doc).await
         } else if msg.event_type == "clicks" {
             let mut doc: Clicks = serde_json::from_str::<Clicks>(msg.data.as_str()).unwrap();
             doc.ip_address = msg.ip;
             doc.user_agent = msg.user_agent;
-            let result = storage.add(msg.event_type, doc).await;
-            match result {
-                Ok(s) => info!("Event added {}", s.code),
-                Err(e) => warn!("Error {}", e.message),
-            }
+            storage.add(msg.event_type, doc).await
         } else {
-            warn!("Unknown event type {}", msg.event_type)
+            warn!("Unknown event type {}", msg.event_type);
+            Err(StorageErr {
+                message: "unknown event type".into(),
+            })
         }
     }
 }
