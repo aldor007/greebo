@@ -62,7 +62,7 @@ async fn main() -> std::result::Result<(), std::io::Error> {
         .await
         .unwrap();
 
-    let mut worker = worker::Worker::new(4, storage);
+    let mut worker = worker::Worker::new(2, storage);
     worker.run();
 
     let listen = greebo_config_cpy.clone().listen;

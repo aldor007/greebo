@@ -32,6 +32,7 @@ pub struct Storage {
 
 pub const VERSION: &'static str = "0.1.0";
 
+#[derive(Clone)]
 pub struct Msg {
     pub event_type: String,
     pub data: String,

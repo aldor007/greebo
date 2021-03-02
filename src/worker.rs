@@ -34,7 +34,7 @@ where
     S: Storage + Send + Clone + Sync + 'static,
 {
     pub fn new(count: usize, storage: S) -> Worker<S> {
-        let (s, r) = crossbeam_channel::bounded::<greebo::Msg>(count);
+        let (s, r) = crossbeam_channel::bounded::<greebo::Msg>(count * 2);
         Worker {
             inner: Arc::new(WorkerInner {
                 sender: s,
@@ -58,9 +58,15 @@ where
                 loop {
                     select! {
                         recv(local_recv) -> msg =>  match msg {
-                            Ok (m) => match self_cp.process_message(m).await {
+                            Ok (m) => match self_cp.process_message(m.clone()).await {
                                 Ok(res) =>  info!("Event added {}", res),
-                                Err(err) => warn!("Error adding event {}", err)
+                                Err(err) =>  {
+                                    warn!("Error adding event {} retrying ", err);
+                                    match self_cp.process_message(m.clone()).await {
+                                        Ok(res) =>  info!("Event added {}", res),
+                                        Err(err) =>  warn!("Event dropped {}", err)
+                                    }
+                                }
                             },
                             Err(err) => warn!("Recv error {}", err)
                         }
