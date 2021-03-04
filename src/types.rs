@@ -102,61 +102,61 @@ struct Time {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Utc {
     #[serde(default)]
-    millisecond: i64,
+    millisecond: f64,
     #[serde(default)]
     day_of_week_string: String,
     #[serde(default)]
-    hour: i64,
+    hour: f64,
     #[serde(default)]
-    timezone_offset: i64,
+    timezone_offset: f64,
     #[serde(default)]
-    day_of_month: i64,
+    day_of_month: f64,
     #[serde(default)]
-    day_of_week: i64,
+    day_of_week: f64,
     #[serde(default)]
-    day_of_year: i64,
+    day_of_year: f64,
     #[serde(default)]
-    second: i64,
+    second: f64,
     #[serde(default)]
-    week: i64,
+    week: f64,
     #[serde(default)]
-    year: i64,
+    year: f64,
     #[serde(default)]
-    month: i64,
+    month: f64,
     #[serde(default)]
-    minute: i64,
+    minute: f64,
     #[serde(default)]
-    quarter_of_year: i64,
+    quarter_of_year: f64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Local {
     #[serde(default)]
-    millisecond: i64,
+    millisecond: f64,
     #[serde(default)]
     day_of_week_string: String,
     #[serde(default)]
-    hour: i64,
+    hour: f64,
     #[serde(default)]
-    timezone_offset: i64,
+    timezone_offset: f64,
     #[serde(default)]
-    day_of_month: i64,
+    day_of_month: f64,
     #[serde(default)]
-    day_of_week: i64,
+    day_of_week: f64,
     #[serde(default)]
-    day_of_year: i64,
+    day_of_year: f64,
     #[serde(default)]
-    second: i64,
+    second: f64,
     #[serde(default)]
-    week: i64,
+    week: f64,
     #[serde(default)]
-    year: i64,
+    year: f64,
     #[serde(default)]
-    month: i64,
+    month: f64,
     #[serde(default)]
-    minute: i64,
+    minute: f64,
     #[serde(default)]
-    quarter_of_year: i64,
+    quarter_of_year: f64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -182,11 +182,11 @@ struct Element {
     #[serde(default)]
     href: String,
     #[serde(default)]
-    #[serde(deserialize_with = "parse_int_or_null")]
-    x_position: i64,
+    #[serde(deserialize_with = "parse_number_or_null")]
+    x_position: f64,
     #[serde(default)]
-    #[serde(deserialize_with = "parse_int_or_null")]
-    y_position: i64,
+    #[serde(deserialize_with = "parse_number_or_null")]
+    y_position: f64,
     #[serde(default)]
     #[serde(deserialize_with = "parse_string_or_null")]
     #[cfg(feature = "string-null-none")]
@@ -206,11 +206,11 @@ struct Element {
     class: String,
 }
 
-fn parse_int_or_null<'de, D>(d: D) -> Result<i64, D::Error>
+fn parse_number_or_null<'de, D>(d: D) -> Result<f64, D::Error>
 where
     D: Deserializer<'de>,
 {
-    Deserialize::deserialize(d).map(|x: Option<_>| x.unwrap_or(0))
+    Deserialize::deserialize(d).map(|x: Option<_>| x.unwrap_or(0.0))
 }
 
 fn parse_string_or_null<'de, D>(d: D) -> Result<String, D::Error>
@@ -266,32 +266,32 @@ struct Profile {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Screen {
     orientation: Orientation,
-    width: i64,
+    width: f64,
     #[serde(rename = "availHeight")]
-    avail_height: i64,
-    height: i64,
+    avail_height: f64,
+    height: f64,
     #[serde(rename = "availWidth")]
-    avail_width: i64,
+    avail_width: f64,
     #[serde(rename = "colorDepth")]
-    color_depth: i64,
+    color_depth: f64,
     #[serde(rename = "pixelDepth")]
-    pixel_depth: i64,
+    pixel_depth: f64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Orientation {
     #[serde(rename = "type")]
     type_field: String,
-    angle: i64,
+    angle: f64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct Window {
-    width: i64,
+    width: f64,
     ratio: Ratio,
     #[serde(rename = "scrollHeight")]
-    scroll_height: i64,
-    height: i64,
+    scroll_height: f64,
+    height: f64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -347,14 +347,14 @@ struct Page {
     scroll_state: ScrollState,
     title: String,
     description: String,
-    time_on_page: i64,
+    time_on_page: f64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 struct ScrollState {
-    pixel_max: i64,
+    pixel_max: f64,
     ratio: f64,
-    pixel: i64,
+    pixel: f64,
     ratio_max: f64,
 }
 
