@@ -44,5 +44,5 @@ log = "0.4.14"
 tonic = "0.4.0"
 prost = "0.7"
 prost-types = "0.8"
-tokio = { version = "1.2.0", features = ["full"] }
+tokio = { version = "1.8.4", features = ["full"] }
 async-trait = "0.1.42"
